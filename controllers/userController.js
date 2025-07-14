@@ -1,9 +1,8 @@
 const User = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
+const { generateAccessToken, generateRefreshToken } = require("../utils/jwt");
 
-// @desc    Get all users
-// @route   GET /api/users
-// @access  Private/Admin
 const getUsers = asyncHandler(async (req, res) => {
   try {
     const pageSize = 10;
@@ -37,9 +36,6 @@ const getUsers = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Get user by ID
-// @route   GET /api/users/:id
-// @access  Private/Admin
 const getUserById = asyncHandler(async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
@@ -103,9 +99,6 @@ const createUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Update user
-// @route   PUT /api/users/:id
-// @access  Private/Admin
 const updateUser = asyncHandler(async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -154,9 +147,6 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Delete user
-// @route   DELETE /api/users/:id
-// @access  Private/Admin
 const deleteUser = asyncHandler(async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -178,10 +168,141 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
+const register = asyncHandler(async (req, res) => {
+  const { name, email, password, role } = req.body;
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return res.status(400).json({ message: "User already exists" });
+  }
+
+  const newUser = await User.create({
+    name,
+    email,
+    password,
+    role: role || "user",
+  });
+
+  if (newUser) {
+    // Tạo tokens
+    const accessToken = generateAccessToken(newUser._id);
+    const refreshToken = generateRefreshToken(newUser._id);
+
+    // Set secure cookies
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 phút
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+    });
+
+    const { password, ...userWithoutPassword } = newUser.toObject();
+    return res.status(201).json(userWithoutPassword);
+  } else {
+    return res.status(500).json({ message: "Error creating user" });
+  }
+});
+
+// Lấy thông tin user hiện tại (verify access token)
+const getCurrentUser = asyncHandler(async (req, res) => {
+  const { accessToken } = req.cookies;
+
+  if (!accessToken) {
+    return res.status(401).json({ message: "No access token" });
+  }
+
+  try {
+    const decoded = jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET || "your-secret-key"
+    );
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid access token" });
+  }
+});
+
+// Refresh token
+const refreshToken = asyncHandler(async (req, res) => {
+  const { refreshToken } = req.cookies;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "No refresh token" });
+  }
+
+  try {
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET || "your-refresh-secret-key"
+    );
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    // Tạo access token mới
+    const newAccessToken = generateAccessToken(user._id);
+
+    // Set access token mới
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000,
+    });
+
+    // Kiểm tra refresh token có sắp hết hạn không
+    const refreshTokenExp = jwt.decode(refreshToken).exp;
+    const now = Math.floor(Date.now() / 1000);
+    const timeLeft = refreshTokenExp - now;
+
+    // Nếu refresh token còn < 1 ngày thì tạo mới
+    if (timeLeft < 24 * 60 * 60) {
+      const newRefreshToken = generateRefreshToken(user._id);
+      res.cookie("refreshToken", newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+    }
+
+    const { password, ...userWithoutPassword } = user.toObject();
+    res.json(userWithoutPassword);
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid refresh token" });
+  }
+});
+
+// Logout
+const logout = asyncHandler(async (req, res) => {
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
+  res.json({ message: "Logged out successfully" });
+});
+
 module.exports = {
   getUsers,
   getUserById,
   createUser,
   updateUser,
   deleteUser,
+  register,
+  getCurrentUser,
+  refreshToken,
+  logout,
 };

@@ -6,6 +6,10 @@ const {
   createUser,
   updateUser,
   deleteUser,
+  register,
+  getCurrentUser,
+  refreshToken,
+  logout,
 } = require("../controllers/userController");
 const { protect, admin } = require("../middleware/authMiddleware");
 
@@ -19,5 +23,10 @@ router
   .get(protect, admin, getUserById)
   .put(protect, admin, updateUser)
   .delete(protect, admin, deleteUser);
+
+router.route("/register").post(register);
+router.route("/me").get(getCurrentUser);
+router.route("/refresh").post(refreshToken);
+router.route("/logout").post(logout);
 
 module.exports = router;
