@@ -1,9 +1,6 @@
 const Table = require("../models/tableModel");
 const asyncHandler = require("express-async-handler");
 
-// @desc    Get all tables
-// @route   GET /api/tables
-// @access  Public
 const getTables = asyncHandler(async (req, res) => {
   try {
     const pageSize = 10;
@@ -36,9 +33,6 @@ const getTables = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Get single table
-// @route   GET /api/tables/:id
-// @access  Public
 const getTableById = asyncHandler(async (req, res) => {
   try {
     const table = await Table.findById(req.params.id);
@@ -59,9 +53,6 @@ const getTableById = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Create a table
-// @route   POST /api/tables
-// @access  Private/Admin
 const createTable = asyncHandler(async (req, res) => {
   try {
     const { number, capacity, status } = req.body;
@@ -94,9 +85,6 @@ const createTable = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Update a table
-// @route   PUT /api/tables/:id
-// @access  Private/Admin
 const updateTable = asyncHandler(async (req, res) => {
   try {
     const { number, capacity, status } = req.body;
@@ -136,9 +124,6 @@ const updateTable = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Delete a table
-// @route   DELETE /api/tables/:id
-// @access  Private/Admin
 const deleteTable = asyncHandler(async (req, res) => {
   try {
     const table = await Table.findById(req.params.id);

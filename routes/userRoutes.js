@@ -10,6 +10,7 @@ const {
   getCurrentUser,
   refreshToken,
   logout,
+  login,
 } = require("../controllers/userController");
 const { protect, admin } = require("../middleware/authMiddleware");
 
@@ -28,5 +29,6 @@ router.route("/register").post(register);
 router.route("/me").get(getCurrentUser);
 router.route("/refresh").post(refreshToken);
 router.route("/logout").post(logout);
+router.route("/login").post(login);
 
 module.exports = router;

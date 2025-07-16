@@ -1,9 +1,6 @@
 const Order = require("../models/orderModel");
 const asyncHandler = require("express-async-handler");
 
-// @desc    Create new order
-// @route   POST /api/orders
-// @access  Private
 const createOrder = asyncHandler(async (req, res) => {
   try {
     const { orderItems, table, paymentMethod, totalPrice, status } = req.body;
@@ -43,9 +40,6 @@ const createOrder = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Get order by ID
-// @route   GET /api/orders/:id
-// @access  Private
 const getOrderById = asyncHandler(async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
@@ -57,7 +51,6 @@ const getOrderById = asyncHandler(async (req, res) => {
       throw new Error("Order not found");
     }
 
-    // Check if the order belongs to the user or if user is admin
     if (
       order.user._id.toString() !== req.user._id.toString() &&
       req.user.role !== "admin"
@@ -77,9 +70,6 @@ const getOrderById = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Get logged in user orders
-// @route   GET /api/orders/myorders
-// @access  Private
 const getMyOrders = asyncHandler(async (req, res) => {
   try {
     const pageSize = 10;
@@ -104,9 +94,6 @@ const getMyOrders = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Get all orders
-// @route   GET /api/orders
-// @access  Private/Admin
 const getOrders = asyncHandler(async (req, res) => {
   try {
     const pageSize = 10;
@@ -141,9 +128,6 @@ const getOrders = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Update order status
-// @route   PUT /api/orders/:id/status
-// @access  Private/Admin
 const updateOrderStatus = asyncHandler(async (req, res) => {
   try {
     const { status } = req.body;
@@ -178,9 +162,6 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Delete order
-// @route   DELETE /api/orders/:id
-// @access  Private/Admin
 const deleteOrder = asyncHandler(async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);

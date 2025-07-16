@@ -3,9 +3,6 @@ const Product = require("../models/productModel");
 const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 
-// @desc    Get all categories
-// @route   GET /api/categories
-// @access  Public
 const getCategories = async (req, res) => {
   try {
     const categories = await Category.find({});
@@ -15,9 +12,6 @@ const getCategories = async (req, res) => {
   }
 };
 
-// @desc    Get single category
-// @route   GET /api/categories/:id
-// @access  Public
 const getCategoryById = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
@@ -31,9 +25,6 @@ const getCategoryById = async (req, res) => {
   }
 };
 
-// @desc    Create a category
-// @route   POST /api/categories
-// @access  Private/Admin
 const createCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -48,9 +39,6 @@ const createCategory = async (req, res) => {
   }
 };
 
-// @desc    Update a category
-// @route   PUT /api/categories/:id
-// @access  Private/Admin
 const updateCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -70,9 +58,6 @@ const updateCategory = async (req, res) => {
   }
 };
 
-// @desc    Delete a category
-// @route   DELETE /api/categories/:id
-// @access  Private/Admin
 const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);

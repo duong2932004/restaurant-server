@@ -1,10 +1,6 @@
 const Cart = require("../models/cartModel");
 const Product = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
-
-// @desc    Get user cart
-// @route   GET /api/cart
-// @access  Private
 const getCart = asyncHandler(async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id }).populate(
     "items.product",
@@ -18,9 +14,6 @@ const getCart = asyncHandler(async (req, res) => {
   res.json(cart);
 });
 
-// @desc    Add item to cart
-// @route   POST /api/cart
-// @access  Private
 const addToCart = asyncHandler(async (req, res) => {
   const { productId, quantity } = req.body;
 
@@ -65,9 +58,6 @@ const addToCart = asyncHandler(async (req, res) => {
   res.status(201).json(cart);
 });
 
-// @desc    Update cart item quantity
-// @route   PUT /api/cart/:productId
-// @access  Private
 const updateCartItem = asyncHandler(async (req, res) => {
   const { quantity } = req.body;
 
@@ -110,9 +100,6 @@ const updateCartItem = asyncHandler(async (req, res) => {
   res.json(cart);
 });
 
-// @desc    Remove item from cart
-// @route   DELETE /api/cart/:productId
-// @access  Private
 const removeFromCart = asyncHandler(async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id });
 
@@ -144,9 +131,6 @@ const removeFromCart = asyncHandler(async (req, res) => {
   res.json(cart);
 });
 
-// @desc    Clear cart
-// @route   DELETE /api/cart
-// @access  Private
 const clearCart = asyncHandler(async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id });
 

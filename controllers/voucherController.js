@@ -1,9 +1,6 @@
 const Voucher = require("../models/voucherModel");
 const asyncHandler = require("express-async-handler");
 
-// @desc    Get all vouchers
-// @route   GET /api/vouchers
-// @access  Public
 const getVouchers = asyncHandler(async (req, res) => {
   try {
     const pageSize = 10;
@@ -36,9 +33,6 @@ const getVouchers = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Get single voucher
-// @route   GET /api/vouchers/:id
-// @access  Public
 const getVoucherById = asyncHandler(async (req, res) => {
   try {
     const voucher = await Voucher.findById(req.params.id);
@@ -59,9 +53,6 @@ const getVoucherById = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Create a voucher
-// @route   POST /api/vouchers
-// @access  Private/Admin
 const createVoucher = asyncHandler(async (req, res) => {
   try {
     const {
@@ -109,9 +100,6 @@ const createVoucher = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Update a voucher
-// @route   PUT /api/vouchers/:id
-// @access  Private/Admin
 const updateVoucher = asyncHandler(async (req, res) => {
   try {
     const {
@@ -166,9 +154,6 @@ const updateVoucher = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Delete a voucher
-// @route   DELETE /api/vouchers/:id
-// @access  Private/Admin
 const deleteVoucher = asyncHandler(async (req, res) => {
   try {
     const voucher = await Voucher.findById(req.params.id);

@@ -3,9 +3,6 @@ const Product = require("../models/productModel");
 const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 
-// @desc    Create new comment
-// @route   POST /api/comments
-// @access  Private
 const createComment = async (req, res) => {
   try {
     const { productId, rating, comment } = req.body;
@@ -38,9 +35,6 @@ const createComment = async (req, res) => {
   }
 };
 
-// @desc    Get all comments for a product
-// @route   GET /api/comments/product/:id
-// @access  Public
 const getProductComments = async (req, res) => {
   try {
     const comments = await Comment.find({ product: req.params.id })
@@ -52,9 +46,6 @@ const getProductComments = async (req, res) => {
   }
 };
 
-// @desc    Update comment
-// @route   PUT /api/comments/:id
-// @access  Private
 const updateComment = async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.id);
@@ -79,9 +70,6 @@ const updateComment = async (req, res) => {
   }
 };
 
-// @desc    Delete comment
-// @route   DELETE /api/comments/:id
-// @access  Private
 const deleteComment = async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.id);

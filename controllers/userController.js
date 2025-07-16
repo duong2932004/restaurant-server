@@ -48,7 +48,7 @@ const getUserById = asyncHandler(async (req, res) => {
     res.json(user);
   } catch (error) {
     if (error.name === "CastError") {
-      res.status(400);
+      res.status(404);
       throw new Error("Invalid user ID format");
     }
     res.status(500);
@@ -64,13 +64,13 @@ const createUser = asyncHandler(async (req, res) => {
     const { name, email, password, role } = req.body;
 
     if (!name || !email || !password) {
-      res.status(400);
+      res.status(404);
       throw new Error("Please provide name, email and password");
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      res.status(400);
+      res.status(404);
       throw new Error("User already exists");
     }
 
@@ -91,7 +91,7 @@ const createUser = asyncHandler(async (req, res) => {
     }
   } catch (error) {
     if (error.name === "ValidationError") {
-      res.status(400);
+      res.status(404);
       throw new Error("Invalid user data: " + error.message);
     }
     res.status(500);
@@ -113,7 +113,7 @@ const updateUser = asyncHandler(async (req, res) => {
     if (email && email !== user.email) {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-        res.status(400);
+        res.status(404);
         throw new Error("Email already exists");
       }
     }
@@ -135,11 +135,11 @@ const updateUser = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     if (error.name === "CastError") {
-      res.status(400);
+      res.status(404);
       throw new Error("Invalid user ID format");
     }
     if (error.name === "ValidationError") {
-      res.status(400);
+      res.status(404);
       throw new Error("Invalid user data: " + error.message);
     }
     res.status(500);
@@ -160,7 +160,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     res.json({ message: "User removed successfully" });
   } catch (error) {
     if (error.name === "CastError") {
-      res.status(400);
+      res.status(404);
       throw new Error("Invalid user ID format");
     }
     res.status(500);
@@ -173,7 +173,7 @@ const register = asyncHandler(async (req, res) => {
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return res.status(400).json({ message: "User already exists" });
+    return res.status(404).json({ message: "User already exists" });
   }
 
   const newUser = await User.create({
@@ -184,25 +184,6 @@ const register = asyncHandler(async (req, res) => {
   });
 
   if (newUser) {
-    // Tạo tokens
-    const accessToken = generateAccessToken(newUser._id);
-    const refreshToken = generateRefreshToken(newUser._id);
-
-    // Set secure cookies
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 15 * 60 * 1000, // 15 phút
-    });
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
-    });
-
     const { password, ...userWithoutPassword } = newUser.toObject();
     return res.status(201).json(userWithoutPassword);
   } else {
@@ -210,7 +191,35 @@ const register = asyncHandler(async (req, res) => {
   }
 });
 
-// Lấy thông tin user hiện tại (verify access token)
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+  console.log(user);
+
+  if (!user || !(await user.matchPassword(password))) {
+    return res.status(404).json({ message: "Invalid email or password" });
+  }
+
+  const accessToken = generateAccessToken(user._id);
+  const refreshToken = generateRefreshToken(user._id);
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 15 * 60 * 1000,
+  });
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  const { password: pwd, ...userWithoutPassword } = user.toObject();
+  res.json(userWithoutPassword);
+});
+
 const getCurrentUser = asyncHandler(async (req, res) => {
   const { accessToken } = req.cookies;
 
@@ -235,7 +244,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   }
 });
 
-// Refresh token
 const refreshToken = asyncHandler(async (req, res) => {
   const { refreshToken } = req.cookies;
 
@@ -254,10 +262,8 @@ const refreshToken = asyncHandler(async (req, res) => {
       return res.status(401).json({ message: "User not found" });
     }
 
-    // Tạo access token mới
     const newAccessToken = generateAccessToken(user._id);
 
-    // Set access token mới
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -265,12 +271,10 @@ const refreshToken = asyncHandler(async (req, res) => {
       maxAge: 15 * 60 * 1000,
     });
 
-    // Kiểm tra refresh token có sắp hết hạn không
     const refreshTokenExp = jwt.decode(refreshToken).exp;
     const now = Math.floor(Date.now() / 1000);
     const timeLeft = refreshTokenExp - now;
 
-    // Nếu refresh token còn < 1 ngày thì tạo mới
     if (timeLeft < 24 * 60 * 60) {
       const newRefreshToken = generateRefreshToken(user._id);
       res.cookie("refreshToken", newRefreshToken, {
@@ -288,7 +292,6 @@ const refreshToken = asyncHandler(async (req, res) => {
   }
 });
 
-// Logout
 const logout = asyncHandler(async (req, res) => {
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
@@ -302,6 +305,7 @@ module.exports = {
   updateUser,
   deleteUser,
   register,
+  login,
   getCurrentUser,
   refreshToken,
   logout,
