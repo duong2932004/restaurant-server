@@ -56,21 +56,18 @@ const getUserById = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Create a user
-// @route   POST /api/users
-// @access  Private/Admin
 const createUser = asyncHandler(async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
     if (!name || !email || !password) {
-      res.status(404);
+      res.status(400);
       throw new Error("Please provide name, email and password");
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      res.status(404);
+      res.status(400);
       throw new Error("User already exists");
     }
 
@@ -91,7 +88,7 @@ const createUser = asyncHandler(async (req, res) => {
     }
   } catch (error) {
     if (error.name === "ValidationError") {
-      res.status(404);
+      res.status(400);
       throw new Error("Invalid user data: " + error.message);
     }
     res.status(500);
@@ -113,7 +110,7 @@ const updateUser = asyncHandler(async (req, res) => {
     if (email && email !== user.email) {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-        res.status(404);
+        res.status(400);
         throw new Error("Email already exists");
       }
     }
@@ -139,7 +136,7 @@ const updateUser = asyncHandler(async (req, res) => {
       throw new Error("Invalid user ID format");
     }
     if (error.name === "ValidationError") {
-      res.status(404);
+      res.status(400);
       throw new Error("Invalid user data: " + error.message);
     }
     res.status(500);
@@ -171,9 +168,15 @@ const deleteUser = asyncHandler(async (req, res) => {
 const register = asyncHandler(async (req, res) => {
   const { name, email, password, role } = req.body;
 
+  if (!name || !email || !password) {
+    return res
+      .status(400)
+      .json({ message: "Please provide name, email and password" });
+  }
+
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return res.status(404).json({ message: "User already exists" });
+    return res.status(400).json({ message: "User already exists" });
   }
 
   const newUser = await User.create({
@@ -194,26 +197,34 @@ const register = asyncHandler(async (req, res) => {
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res
+      .status(400)
+      .json({ message: "Please provide email and password" });
+  }
+
   const user = await User.findOne({ email });
   console.log(user);
 
   if (!user || !(await user.matchPassword(password))) {
-    return res.status(404).json({ message: "Invalid email or password" });
+    return res.status(400).json({ message: "Invalid email or password" });
   }
 
   const accessToken = generateAccessToken(user._id);
   const refreshToken = generateRefreshToken(user._id);
+
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     maxAge: 15 * 60 * 1000,
   });
+
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
   const { password: pwd, ...userWithoutPassword } = user.toObject();
