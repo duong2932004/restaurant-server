@@ -1,10 +1,8 @@
 const express = require("express");
 const app = express();
 
-// Middlewares, routes, etc.
-app.get("/api/hello", (req, res) => {
-  res.json({ message: "Hello from Vercel Serverless!" });
-});
+app.get("/", (req, res) => res.send("Express on Vercel"));
 
-// Export handler cho Vercel
+app.listen(3000, () => console.log("Server ready on port 3000."));
+
 module.exports = app;
