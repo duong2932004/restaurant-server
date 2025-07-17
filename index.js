@@ -1,7 +1,7 @@
-// process.on("uncaughtException", (err) => {
-//   console.error("Uncaught Exception:", err);
-//   process.exit(1);
-// });
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  process.exit(1);
+});
 
 require("dotenv").config();
 const express = require("express");
@@ -46,12 +46,6 @@ app.get("/", (req, res) => {
   res.send(`Server running ${PORT}`);
 });
 
-app.get("/greet", (req, res) => {
-  // get the passed query
-  const { name } = req.query;
-  res.send({ msg: `Welcome ${name}!` });
-});
-
 // 404 handler
 app.use((req, res, next) => {
   res.status(404);
@@ -66,55 +60,11 @@ app.use((err, req, res, next) => {
   });
 });
 
-// const server = app.listen(PORT, () => {
-//   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-// });
+const server = app.listen(PORT, () => {
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+});
 
-// process.on("unhandledRejection", (reason) => {
-//   console.error("Unhandled Rejection:", reason);
-//   server.close(() => process.exit(1));
-// });
-module.exports = app;
-// const express = require("express");
-// const cors = require("cors");
-// const helmet = require("helmet");
-// const morgan = require("morgan");
-// const cookieParser = require("cookie-parser");
-// // const connectDB = require("./config/db"); // Nếu cần, đảm bảo không lỗi
-
-// const app = express();
-
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
-// app.use(cookieParser());
-// app.use(
-//   cors({
-//     origin: process.env.CLIENT_URL || "http://localhost:3000",
-//     credentials: true,
-//   })
-// );
-// app.use(helmet());
-// app.use(morgan("dev"));
-
-// // connectDB(); // Nếu cần, đảm bảo không lỗi
-
-// // Mount routes như bình thường
-// app.use("/api/users", require("./routes/userRoutes"));
-// // ... các route khác
-
-// // 404 handler
-// app.use((req, res, next) => {
-//   res.status(404);
-//   next(new Error(`Not Found - ${req.originalUrl}`));
-// });
-
-// app.use((err, req, res, next) => {
-//   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-//   res.status(statusCode).json({
-//     message: err.message,
-//     stack: process.env.NODE_ENV === "production" ? null : err.stack,
-//   });
-// });
-
-// // Không dùng app.listen
-// module.exports = app;
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Rejection:", reason);
+  server.close(() => process.exit(1));
+});
