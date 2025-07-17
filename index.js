@@ -46,6 +46,12 @@ app.get("/", (req, res) => {
   res.send(`Server running ${PORT}`);
 });
 
+app.get("/greet", (req, res) => {
+  // get the passed query
+  const { name } = req.query;
+  res.send({ msg: `Welcome ${name}!` });
+});
+
 // 404 handler
 app.use((req, res, next) => {
   res.status(404);
