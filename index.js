@@ -1,7 +1,7 @@
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err);
-  process.exit(1);
-});
+// process.on("uncaughtException", (err) => {
+//   console.error("Uncaught Exception:", err);
+//   process.exit(1);
+// });
 
 require("dotenv").config();
 const express = require("express");
@@ -70,10 +70,10 @@ app.use((err, req, res, next) => {
 //   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 // });
 
-process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled Rejection:", reason);
-  server.close(() => process.exit(1));
-});
+// process.on("unhandledRejection", (reason) => {
+//   console.error("Unhandled Rejection:", reason);
+//   server.close(() => process.exit(1));
+// });
 module.exports = app;
 // const express = require("express");
 // const cors = require("cors");
