@@ -9,7 +9,7 @@ const {
 } = require("../controllers/categoryController");
 const { protect, admin } = require("../middleware/authMiddleware");
 
-// Public routes
+// Public
 router.get("/", getCategories);
 router.get("/:id", getCategoryById);
 
