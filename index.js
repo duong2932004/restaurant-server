@@ -76,14 +76,45 @@
 // });
 // module.exports = app;
 const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
+// const connectDB = require("./config/db"); // Nếu cần, đảm bảo không lỗi
+
 const app = express();
 
-// A simple get greet method
-app.get("/greet", (req, res) => {
-  // get the passed query
-  const { name } = req.query;
-  res.send({ msg: `Welcome ${name}!` });
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
+app.use(helmet());
+app.use(morgan("dev"));
+
+// connectDB(); // Nếu cần, đảm bảo không lỗi
+
+// Mount routes như bình thường
+app.use("/api/users", require("./routes/userRoutes"));
+// ... các route khác
+
+// 404 handler
+app.use((req, res, next) => {
+  res.status(404);
+  next(new Error(`Not Found - ${req.originalUrl}`));
 });
 
-// export the app for vercel serverless functions
+app.use((err, req, res, next) => {
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode).json({
+    message: err.message,
+    stack: process.env.NODE_ENV === "production" ? null : err.stack,
+  });
+});
+
+// Không dùng app.listen
 module.exports = app;
