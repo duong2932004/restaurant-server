@@ -68,3 +68,5 @@ process.on("unhandledRejection", (reason) => {
   console.error("Unhandled Rejection:", reason);
   server.close(() => process.exit(1));
 });
+
+module.exports = app;
