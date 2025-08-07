@@ -63,7 +63,6 @@ const createProduct = asyncHandler(async (req, res) => {
       category,
       quantity,
       variants: variants || [],
-      user: req.user._id,
     });
 
     const createdProduct = await product.save();

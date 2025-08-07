@@ -243,7 +243,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
       accessToken,
       process.env.JWT_SECRET || "your-secret-key"
     );
-    const user = await User.findById(decoded.userId).select("-password");
+    const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
       return res.status(401).json({ message: "User not found" });
@@ -267,7 +267,7 @@ const refreshToken = asyncHandler(async (req, res) => {
       refreshToken,
       process.env.JWT_REFRESH_SECRET || "your-refresh-secret-key"
     );
-    const user = await User.findById(decoded.userId);
+    const user = await User.findById(decoded.id);
 
     if (!user) {
       return res.status(401).json({ message: "User not found" });
