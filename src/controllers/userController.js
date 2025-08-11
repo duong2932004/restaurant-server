@@ -232,6 +232,9 @@ const login = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
+  if (req.user) {
+    return res.json(req.user);
+  }
   const { accessToken } = req.cookies;
 
   if (!accessToken) {
@@ -299,6 +302,7 @@ const refreshToken = asyncHandler(async (req, res) => {
     const { password, ...userWithoutPassword } = user.toObject();
     res.json(userWithoutPassword);
   } catch (error) {
+    console.error("🔍 Refresh Token Error:", error.message);
     return res.status(401).json({ message: "Invalid refresh token" });
   }
 });

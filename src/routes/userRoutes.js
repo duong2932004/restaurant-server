@@ -12,8 +12,22 @@ const {
   logout,
   login,
 } = require("../controllers/userController");
-const { protect, admin } = require("../middleware/authMiddleware");
+const {
+  protect,
+  admin,
+  optionalAuth,
+} = require("../middleware/authMiddleware");
 
+// Public routes
+router.route("/register").post(register);
+router.route("/login").post(login);
+router.route("/refresh").post(refreshToken);
+
+// Protected routes
+router.route("/me").get(protect, getCurrentUser);
+router.route("/logout").post(protect, logout);
+
+// Admin routes
 router
   .route("/")
   .get(protect, admin, getUsers)
@@ -24,11 +38,5 @@ router
   .get(protect, admin, getUserById)
   .put(protect, admin, updateUser)
   .delete(protect, admin, deleteUser);
-
-router.route("/register").post(register);
-router.route("/me").get(getCurrentUser);
-router.route("/refresh").post(refreshToken);
-router.route("/logout").post(logout);
-router.route("/login").post(login);
 
 module.exports = router;

@@ -6,12 +6,12 @@ const JWT_REFRESH_SECRET =
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "15m";
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || "7d";
 
-const generateAccessToken = (userId) => {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+const generateAccessToken = (id) => {
+  return jwt.sign({ id: id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
-const generateRefreshToken = (userId) => {
-  return jwt.sign({ userId }, JWT_REFRESH_SECRET, {
+const generateRefreshToken = (id) => {
+  return jwt.sign({ id: id }, JWT_REFRESH_SECRET, {
     expiresIn: JWT_REFRESH_EXPIRES_IN,
   });
 };
