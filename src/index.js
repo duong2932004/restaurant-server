@@ -20,44 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // cors
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://restaurant-client-blush.vercel.app",
-  ...(process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(",").map((url) => url.trim())
-    : []),
-  process.env.CLIENT_URL,
-].filter(Boolean);
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-
-      const normalizedOrigin = origin.replace(/\/$/, "");
-      const normalizedAllowedOrigins = allowedOrigins.map((url) =>
-        url?.replace(/\/$/, "")
-      );
-
-      console.log("CORS Check:", {
-        origin: origin,
-        normalizedOrigin: normalizedOrigin,
-        allowedOrigins: normalizedAllowedOrigins,
-      });
-
-      if (normalizedAllowedOrigins.includes(normalizedOrigin)) {
-        callback(null, true);
-      } else if (
-        normalizedOrigin.includes(".vercel.app") &&
-        (normalizedOrigin.includes("restaurant-client") ||
-          normalizedOrigin.includes("restaurant"))
-      ) {
-        callback(null, true);
-      } else {
-        console.log("CORS blocked origin:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
     credentials: true,
   })
 );
