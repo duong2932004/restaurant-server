@@ -20,12 +20,27 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // cors
-// app.use(
-//   cors({
-//     origin: process.env.CLIENT_URL || "http://localhost:3000",
-//     credentials: true,
-//   })
-// );
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://restaurant-client-blush.vercel.app",
+  "https://yourdomain.com",
+  "https://www.yourdomain.com",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(null, true);
+    },
+    credentials: true,
+  })
+);
 
 app.use(helmet());
 app.use(morgan("dev"));
